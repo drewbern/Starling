@@ -42,12 +42,13 @@ const MainScreen = ({ navigation }) => {
     }
   }, []);
 
-  const handleConnect = () => {
-    BleManager.getConnectedPeripherals([]).then((results) => {
+  const handleConnect = async () => {
+    await BleManager.getConnectedPeripherals([]).then(async (results) => {
       if (results.length == 0) {
         console.log('No connected peripherals')
       } else if (results.length == 1) {
-        BleManager.connect("58:BF:25:32:C6:56")
+        console.log(results);
+        await BleManager.connect(results[0].id)
           .then(() => {
             // Success code
             console.log("Connected");
@@ -57,13 +58,12 @@ const MainScreen = ({ navigation }) => {
             console.log(error);
           });
       }
-      console.log(results);
       for (var i = 0; i < results.length; i++) {
         var peripheral = results[i];
         peripheral.connected = true;
         peripherals.set(peripheral.id, peripheral);
         setList(Array.from(peripherals.values()));
-        navigation.navigate("NameScreen", { name: results[0].name })
+        navigation.navigate("NameScreen", { name: results[0].name, id: results[0].id })
       }
     });
   }

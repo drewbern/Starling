@@ -10,9 +10,12 @@ import styles from './WelcomeScreenStyles';
 
 
 
-const WelcomeScreen = ({ navigation }) => {
+const WelcomeScreen = ({ navigation, route }) => {
+
+    const { id } = route.params;
+
     const handleStart = async () => {
-     navigation.navigate("BathroomRoutineScreen")
+        navigation.navigate("BathroomRoutineScreen", { id: id })
     }
 
     return (

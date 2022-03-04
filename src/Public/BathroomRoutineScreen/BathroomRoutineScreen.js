@@ -1,30 +1,28 @@
 
 import React, { useEffect, useState } from 'react';
 import {
+    Alert,
     Image,
     Text,
-    View,
-    NativeModules,
-    NativeEventEmitter
+    View
 } from 'react-native';
 import AppHeader from '../../../components/AppHeader/AppHeader';
 import AuthService from '../../Services/API/AuthService';
 import styles from './BathroomRoutineScreenStyles';
 import BleManager from '../../BleManager';
+import * as constant from '../../Utils/Constant';
 import { stringToBytes } from "convert-string";
 var Buffer = require('buffer/')
 let data = stringToBytes("X1234");
 
-const BleManagerModule = NativeModules.BleManager;
-const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
-
-const BathroomRoutineScreen = ({ navigation }) => {
+const BathroomRoutineScreen = ({ navigation, route }) => {
     const [isShowFirst, setIsFirstShow] = useState(false)
     const [isShowSecond, setIsSecondShow] = useState(false)
     const [isShowThird, setIsThirdShow] = useState(false)
     const [isShowFirstImg, setIsFirstShowImg] = useState(false)
     const [isShowSecondImg, setIsSecondShowImg] = useState(false)
     const [isShowThirdImg, setIsThirdShowImg] = useState(false)
+    const { id } = route.params;
     let synccData;
 
     useEffect(() => {
@@ -47,7 +45,7 @@ const BathroomRoutineScreen = ({ navigation }) => {
     }, [])
 
     const retriveServices = async () => {
-        await BleManager.retrieveServices("58:BF:25:32:C6:56").then(
+        await BleManager.retrieveServices(id).then(
             (peripheralInfo) => {
                 console.log("Peripheral info:", peripheralInfo);
             }
@@ -56,9 +54,9 @@ const BathroomRoutineScreen = ({ navigation }) => {
 
     const handshake = async () => {
         await BleManager.write(
-            "58:BF:25:32:C6:56",
-            "198774D4-A7A8-49C1-AA1B-6924D4D6B472",
-            "19873003-A7A8-49C1-AA1B-6924D4D6B472",
+            id,
+            constant.SERVICE_UUID_UART,
+            constant.CHARACTERISTIC_UUID_RX,
             data
         )
             .then(() => {
@@ -73,9 +71,9 @@ const BathroomRoutineScreen = ({ navigation }) => {
     const handleStartAndSync = async () => {
         data = stringToBytes("TEST");
         await BleManager.write(
-            "58:BF:25:32:C6:56",
-            "198774D4-A7A8-49C1-AA1B-6924D4D6B472",
-            "19873003-A7A8-49C1-AA1B-6924D4D6B472",
+            id,
+            constant.SERVICE_UUID_UART,
+            constant.CHARACTERISTIC_UUID_RX,
             data
         )
             .then(() => {
@@ -86,9 +84,9 @@ const BathroomRoutineScreen = ({ navigation }) => {
             });
         data = stringToBytes("SYNCC");
         await BleManager.write(
-            "58:BF:25:32:C6:56",
-            "198774D4-A7A8-49C1-AA1B-6924D4D6B472",
-            "19873003-A7A8-49C1-AA1B-6924D4D6B472",
+            id,
+            constant.SERVICE_UUID_UART,
+            constant.CHARACTERISTIC_UUID_RX,
             data
         )
             .then(() => {
@@ -104,9 +102,9 @@ const BathroomRoutineScreen = ({ navigation }) => {
 
     const handleRead = async () => {
         await BleManager.read(
-            "58:BF:25:32:C6:56",
-            "6a631cbd-063f-43ae-bb9f-bc510706fb72",
-            "6a633000-063f-43ae-bb9f-bc510706fb72"
+            id,
+            constant.SERVICE_UUID_SENSOR,
+            constant.CHARACTERISTIC_UUID_RGBIR
         )
             .then((readData) => {
                 console.log("Read: " + readData);
@@ -129,9 +127,9 @@ const BathroomRoutineScreen = ({ navigation }) => {
                 console.log(error);
             });
         await BleManager.read(
-            "58:BF:25:32:C6:56",
-            "6a631cbd-063f-43ae-bb9f-bc510706fb72",
-            "6a633001-063f-43ae-bb9f-bc510706fb72"
+            id,
+            constant.SERVICE_UUID_SENSOR,
+            constant.CHARACTERISTIC_UUID_UV
         )
             .then((readData) => {
                 console.log("Read: " + readData);
@@ -156,18 +154,19 @@ const BathroomRoutineScreen = ({ navigation }) => {
     }
 
     const syncData = async () => {
-        await AuthService.syncAnalysis(synccData.RGB_RED, synccData.RGB_GREEN, synccData.RGB_BLUE, synccData.RGB_IR, synccData.RGB_UVA)
-            .then((response) => {
-                console.log(response)
-                if (response.message) {
-                    console.log(response.message)
-                } else {
-                    navigation.navigate("SuccessScreen")
-                }
-            })
-            .catch((err) => {
-                console.log(err)
-            })
+        Alert.alert("Alert Title", "Data from bluethooth RED >>" + synccData.RGB_RED + "  GREEN >>" + synccData.RGB_GREEN + "  BLUE >>" + synccData.RGB_BLUE + "  RGB IR >>" + synccData.RGB_IR + "  RGB UVA >>" + synccData.RGB_UVA)
+        // await AuthService.syncAnalysis(synccData.RGB_RED, synccData.RGB_GREEN, synccData.RGB_BLUE, synccData.RGB_IR, synccData.RGB_UVA)
+        //     .then((response) => {
+        //         console.log(response)
+        //         if (response.message) {
+        //             console.log(response.message)
+        //         } else {
+        //             navigation.navigate("SuccessScreen")
+        //         }
+        //     })
+        //     .catch((err) => {
+        //         console.log(err)
+        //     })
     }
 
     return (

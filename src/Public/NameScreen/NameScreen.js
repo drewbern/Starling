@@ -11,7 +11,7 @@ import styles from './NameScreenStyles'
 
 const NameScreen = ({ navigation, route }) => {
 
-    const { name } = route.params;
+    const { name, id } = route.params;
 
     return (
         <ScrollView style={styles.container}>
@@ -33,7 +33,7 @@ const NameScreen = ({ navigation, route }) => {
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("WelcomeScreen")}
+                        onPress={() => navigation.navigate("WelcomeScreen", { id: id })}
                         style={styles.button}>
                         <Text style={styles.buttonText}>Continue</Text>
                     </TouchableOpacity>
